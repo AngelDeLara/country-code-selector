@@ -1,46 +1,64 @@
-# Getting Started with Create React App
+# Country Code Selector Challenge
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This project is a mobile-first React application that implements an efficient country code selector and phone number input system. It's designed to provide a lightweight alternative to existing flag selector packages, significantly reducing bundle size and improving load times.
+
+## Features
+
+- Mobile-first UI design
+- Built with TypeScript and React
+- Dynamic country code selector with flag display
+- Searchable country list dropdown
+- Phone number input with dynamic formatting based on selected country
+- Real-time phone number validation
+- Integration with SoftPoint developer API for country data and two-factor authentication
+- Optimized bundle size (gzipped project under 806kb)
+
+## Getting Started
+
+To run this project locally, follow these steps:
+
+1. Clone the repository:
+   git clone https://github.com/yourusername/country-code-selector-challenge.git
+   cd country-code-selector-challenge
+
+2. Install dependencies:
+   npm install
+
+3. Create a `.env` file in the root directory and add your API credentials:
+   REACT_APP_API_KEY=your_api_key_here
+   REACT_APP_API_BASE_URL=your_api_base_url_here
+
+4. Start the development server:
+   npm start
+
+5. Open ************ to view the app in your browser.
 
 ## Available Scripts
 
 In the project directory, you can run:
 
-### `npm start`
+- `npm start`: Runs the app in development mode
+- `npm test`: Launches the test runner
+- `npm run build`: Builds the app for production
+- `npm run eject`: Ejects from Create React App (one-way operation)
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+## Technical Details
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+- The country selector component displays the currently selected country's flag and code
+- The dropdown menu includes a search field for filtering countries by name
+- Phone number input field updates its placeholder and validation based on the selected country
+- Submission sends the phone number and country ID to the SoftPoint developer API
+- The app retrieves country data from the SoftPoint developer API
 
-### `npm test`
+## Bonus Features
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+- Phone number input field includes a dynamic mask that formats the number as the user types
+- The mask's length and format adjust based on the selected country's phone number length
 
 ## Learn More
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+To learn more about the technologies used in this project:
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+- [React Documentation](https://reactjs.org/)
+- [TypeScript Documentation](https://www.typescriptlang.org/docs/)
+- [Create React App Documentation](https://facebook.github.io/create-react-app/docs/getting-started)

@@ -1,0 +1,69 @@
+.country-selector {
+  position: relative;
+  display: inline-block;
+}
+
+.selected-country {
+  padding: 5px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px 0 0 4px;
+  cursor: pointer;
+  background-color: #f8f8f8;
+  display: flex;
+  align-items: center;
+}
+
+.country-flag {
+  width: 20px;
+  height: auto;
+  margin-right: 5px;
+  object-fit: cover;
+}
+
+.country-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 1000;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  width: 250px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.country-dropdown input {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-bottom: 1px solid #ccc;
+}
+
+.country-dropdown ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.country-dropdown li {
+  padding: 10px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.country-dropdown li:hover {
+  background-color: #f0f0f0;
+}
+
+.country-option {
+  display: flex;
+  align-items: center;
+}
+
+.country-option span {
+  margin-left: 5px;
+}
