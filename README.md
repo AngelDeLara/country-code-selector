@@ -25,13 +25,11 @@ To run this project locally, follow these steps:
    npm install
 
 3. Create a `.env` file in the root directory and add your API credentials:
-   API_KEY=your_api_key_here
-   API_BASE_URL=your_api_base_url_here
+   REACT_APP_API_KEY=your_api_key_here
+   REACT_APP_API_BASE_URL=your_api_base_url_here
 
 4. Start the development server:
    npm start
-
-5. Open [this link](https://country-code-selector.vercel.app/) to view the app in your browser.
 
 ## Available Scripts
 
