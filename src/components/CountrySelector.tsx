@@ -21,14 +21,48 @@ interface CountrySelectorProps {
 /**
  * CountrySelector Component
  * 
- * This component renders a dropdown selector for countries, allowing users to search and select a country.
- * It displays the selected country's flag and calling code, and provides a searchable list of all available countries.
+ * A React component that renders a searchable dropdown for country selection. It displays the flag,
+ * calling code, and name of each country. It also allows users to filter countries based on their search input.
  *
- * @component
- * @param {Object} props - The component props
- * @param {Record<string, Country>} props.countries - An object containing all available countries
- * @param {CountryWithISO | null} props.selectedCountry - The currently selected country
- * @param {function} props.onSelectCountry - Callback function to handle country selection
+ * ## Props
+ * 
+ * @typedef {Object} Country - Represents the basic details of a country.
+ * @property {string} id - The unique identifier for the country.
+ * @property {string} name - The name of the country.
+ * @property {string} calling_code - The country's international calling code.
+ * @property {string} phone_length - The expected phone number length for the country.
+ * 
+ * @typedef {Object} CountryWithISO - Extends the `Country` interface, adding an ISO code.
+ * @property {string} iso - The ISO code for the country.
+ * 
+ * @typedef {Object} CountrySelectorProps - The props expected by the `CountrySelector` component.
+ * @property {Record<string, Country>} countries - An object mapping ISO codes to country objects.
+ * @property {CountryWithISO | null} selectedCountry - The currently selected country or `null`.
+ * @property {function} onSelectCountry - A callback function triggered when a country is selected.
+ * 
+ * @param {CountrySelectorProps} props - The props passed to the component.
+ * 
+ * @returns {JSX.Element} The rendered CountrySelector component.
+ *
+ * ## Behavior
+ * - **Dropdown Toggle**: Clicking on the selected country toggles the visibility of the dropdown.
+ * - **Search**: Filters countries in real-time based on user input in the search field.
+ * - **Outside Click Detection**: Closes the dropdown when the user clicks outside the component.
+ * - **Default Selection**: Automatically selects the first country if no country is selected initially.
+ *
+ * ## Dependencies
+ * - `useState`, `useRef`, `useEffect`, `useMemo` from React for state management, refs, and memoization.
+ * - External CSS for component styling.
+ * - `flagcdn.com` for fetching country flag images using ISO codes.
+ *
+ * ## Example Usage
+ * ```jsx
+ * <CountrySelector 
+ *   countries={countriesData} 
+ *   selectedCountry={selectedCountry} 
+ *   onSelectCountry={handleCountrySelect} 
+ * />
+ * ```
  */
 const CountrySelector: React.FC<CountrySelectorProps> = ({
   countries,
@@ -39,9 +73,7 @@ const CountrySelector: React.FC<CountrySelectorProps> = ({
   const [searchTerm, setSearchTerm] = useState("");
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  /**
-   * Effect to handle closing the dropdown when clicking outside
-   */
+  // Effect to handle closing the dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -55,10 +87,7 @@ const CountrySelector: React.FC<CountrySelectorProps> = ({
     };
   }, []);
 
-  /**
-   * Memoized array of countries with ISO codes
-   * @type {CountryWithISO[]}
-   */
+  // Memoized array of countries with ISO codes
   const countriesArray = useMemo(() => 
     Object.entries(countries).map(([iso, country]) => ({
       ...country,
@@ -67,10 +96,7 @@ const CountrySelector: React.FC<CountrySelectorProps> = ({
     [countries]
   );
 
-  /**
-   * Memoized array of filtered countries based on search term
-   * @type {CountryWithISO[]}
-   */
+  // Memoized array of filtered countries based on search term
   const filteredCountries = useMemo(() => 
     countriesArray.filter((country) =>
       country.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -78,14 +104,18 @@ const CountrySelector: React.FC<CountrySelectorProps> = ({
     [countriesArray, searchTerm]
   );
 
-  /**
-   * Handles the selection of a country
-   * @param {CountryWithISO} country - The selected country
-   */
+  // Handles the selection of a country
   const handleCountrySelect = (country: CountryWithISO) => {
     onSelectCountry(country);
     setIsOpen(false);
   };
+
+  // Automatically selects the first country if no country is selected initially
+  useEffect(() => {
+    if (countriesArray.length > 0 && !selectedCountry) {
+      onSelectCountry(countriesArray[0]);
+    }
+  }, [countriesArray, selectedCountry, onSelectCountry]);
 
   return (
     <div className="country-selector" ref={dropdownRef}>

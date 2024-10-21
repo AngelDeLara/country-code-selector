@@ -1,121 +1,44 @@
-import React, { useState, useEffect, useMemo, Suspense, lazy } from "react";
+import React, { useState, useMemo, useCallback, Suspense, lazy } from "react";
 import axios from "axios";
+import { useAccessToken, useCountries } from "./hooks/useApi";
+import { CountryWithISO } from "./types";
+import ErrorNotification from "./components/ErrorNotification";
 import "./App.css";
 
 const CountrySelector = lazy(() => import("./components/CountrySelector"));
 
-function isCountry(value: unknown): value is Country {
-  return (
-    typeof value === 'object' &&
-    value !== null &&
-    'id' in value &&
-    'name' in value &&
-    'calling_code' in value &&
-    'phone_length' in value
-  );
-}
-
-interface Country {
-  id: string;
-  name: string;
-  calling_code: string;
-  phone_length: string;
-}
-
-interface CountryWithISO extends Country {
-  iso: string;
-}
-
-const API_KEY = process.env.REACT_APP_API_KEY;
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 /**
  * App Component
  * 
- * This component serves as the main entry point for the Country Code Selector application.
- * It manages the state for countries, selected country, phone number input, and handles 
- * API interactions for fetching country data and submitting phone numbers for two-factor authentication.
+ * The App component serves as the main entry point for the Country Code Selector application.
+ * It handles the user interface for entering phone numbers with country-specific formatting,
+ * manages API interactions for fetching country data, and initiates two-factor authentication.
  * 
  * @component
+ * @returns {JSX.Element} The rendered App component.
  */
 const App: React.FC = () => {
-  const [countries, setCountries] = useState<Record<string, Country>>({});
   const [selectedCountry, setSelectedCountry] = useState<CountryWithISO | null>(null);
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [accessToken, setAccessToken] = useState("");
+
+  const { accessToken, error: accessTokenError } = useAccessToken();
+  const { countries, error: countriesError } = useCountries(accessToken);
 
   /**
-   * Fetches the access token from the API.
-   * 
-   * @async
-   * @function fetchAccessToken
-   */
-  useEffect(() => {
-    const fetchAccessToken = async () => {
-      try {
-        const response = await axios.post(
-          `${API_BASE_URL}/access_token?corporate_id=10`,
-          {},
-          {
-            headers: {
-              "Api-Key": API_KEY,
-            },
-          }
-        );
-        setAccessToken(response.data.access_token);
-      } catch (error) {
-        console.error("Error fetching access token:", error);
-      }
-    };
-
-    fetchAccessToken();
-  }, []);
-
-  /**
-   * Fetches the list of countries from the API once the access token is available.
-   * 
-   * @async
-   * @function fetchCountries
-   */
-  useEffect(() => {
-    const fetchCountries = async () => {
-      if (!accessToken) return;
-  
-      try {
-        const response = await axios.get<Record<string, Country>>(`${API_BASE_URL}/challenges/countries`, {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        });
-        setCountries(response.data);
-        
-        const entries = Object.entries(response.data);
-        if (entries.length > 0) {
-          const [iso, country] = entries[0];
-          if (isCountry(country)) {
-            setSelectedCountry({ ...country, iso });
-          }
-        }
-      } catch (error) {
-        console.error("Error fetching countries:", error);
-      }
-    };
-  
-    fetchCountries();
-  }, [accessToken]);
-
-  /**
-   * Formats the phone number based on the input value and the selected country's phone length.
-   * 
+   * Formats the phone number based on user input and the selected country's phone length.
+   *
    * @function formatPhoneNumber
-   * @param {string} value - The raw input value
-   * @param {number} phoneLength - The expected phone number length for the selected country
-   * @returns {string} The formatted phone number
+   * @param {string} value - The raw input value from the user.
+   * @param {number} phoneLength - The expected phone number length for the selected country.
+   * @returns {string} The formatted phone number with appropriate formatting.
    */
-  const formatPhoneNumber = (value: string, phoneLength: number) => {
+  const formatPhoneNumber = useCallback((value: string, phoneLength: number) => {
     const digits = value.replace(/\D/g, "");
     let formatted = "";
-    
+
+    // Format based on the number of digits entered
     if (digits.length <= 3) {
       formatted = `(${digits}`;
     } else if (digits.length <= 6) {
@@ -125,12 +48,13 @@ const App: React.FC = () => {
     }
 
     return formatted;
-  };
+  }, []);
 
   /**
-   * Generates a placeholder mask for the phone input based on the selected country's phone length.
+   * Generates a placeholder mask for the phone input field based on the selected country's phone length.
    * 
    * @type {string}
+   * @returns {string} The placeholder mask for the phone input.
    */
   const placeholderMask = useMemo(() => {
     if (!selectedCountry) return "(000) 000-0000";
@@ -139,39 +63,39 @@ const App: React.FC = () => {
   }, [selectedCountry]);
 
   /**
-   * Handles changes in the phone number input, formatting the input as the user types.
-   * 
+   * Handles changes in the phone number input, applying formatting as the user types.
+   *
    * @function handlePhoneChange
-   * @param {React.ChangeEvent<HTMLInputElement>} e - The change event from the input
+   * @param {React.ChangeEvent<HTMLInputElement>} e - The change event from the input field.
    */
-  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhoneChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value.replace(/\D/g, "");
     if (!selectedCountry) return;
-    
+
     const phoneLength = parseInt(selectedCountry.phone_length, 10);
     const formatted = formatPhoneNumber(inputValue, phoneLength);
     setPhoneNumber(formatted);
-  };
+  }, [selectedCountry, formatPhoneNumber]);
 
   /**
-   * Updates the selected country and resets the phone number input.
-   * 
+   * Updates the selected country and resets the phone number input when the user selects a new country.
+   *
    * @function handleCountryChange
-   * @param {CountryWithISO} country - The newly selected country
+   * @param {CountryWithISO} country - The newly selected country object.
    */
-  const handleCountryChange = (country: CountryWithISO) => {
+  const handleCountryChange = useCallback((country: CountryWithISO) => {
     setSelectedCountry(country);
     setPhoneNumber("");
-  };
+  }, []);
 
   /**
-   * Handles the form submission, initiating the two-factor authentication process.
-   * 
+   * Handles the form submission for initiating two-factor authentication.
+   *
    * @async
    * @function handleSubmit
-   * @param {React.FormEvent} e - The form submission event
+   * @param {React.FormEvent} e - The form submission event.
    */
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     if (selectedCountry && accessToken) {
       try {
@@ -193,12 +117,13 @@ const App: React.FC = () => {
         alert("An error occurred while submitting the phone number.");
       }
     }
-  };
+  }, [selectedCountry, accessToken, phoneNumber]);
 
   /**
-   * Determines if the submit button should be disabled based on the phone number length.
+   * Determines if the submit button should be disabled based on the length of the phone number input.
    * 
    * @type {boolean}
+   * @returns {boolean} True if the submit button should be disabled, otherwise false.
    */
   const isSubmitDisabled = useMemo(() => {
     if (!selectedCountry) return true;
@@ -207,7 +132,10 @@ const App: React.FC = () => {
     return currentLength < requiredLength;
   }, [selectedCountry, phoneNumber]);
 
-  console.log('isSubmitDisabled', isSubmitDisabled)
+  // Handle error states for access token and country data retrieval
+  if (accessTokenError || countriesError) {
+    return <ErrorNotification message={(accessTokenError || countriesError) ?? ''} />;
+  }
 
   return (
     <div className="App">
