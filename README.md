@@ -25,8 +25,8 @@ To run this project locally, follow these steps:
    npm install
 
 3. Create a `.env` file in the root directory and add your API credentials:
-   REACT_APP_API_KEY=your_api_key_here
-   REACT_APP_API_BASE_URL=your_api_base_url_here
+   API_KEY=your_api_key_here
+   API_BASE_URL=your_api_base_url_here
 
 4. Start the development server:
    npm start
