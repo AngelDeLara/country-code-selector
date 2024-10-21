@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import "./CountrySelector.css";
 
 interface Country {
@@ -18,6 +18,18 @@ interface CountrySelectorProps {
   onSelectCountry: (country: CountryWithISO) => void;
 }
 
+/**
+ * CountrySelector Component
+ * 
+ * This component renders a dropdown selector for countries, allowing users to search and select a country.
+ * It displays the selected country's flag and calling code, and provides a searchable list of all available countries.
+ *
+ * @component
+ * @param {Object} props - The component props
+ * @param {Record<string, Country>} props.countries - An object containing all available countries
+ * @param {CountryWithISO | null} props.selectedCountry - The currently selected country
+ * @param {function} props.onSelectCountry - Callback function to handle country selection
+ */
 const CountrySelector: React.FC<CountrySelectorProps> = ({
   countries,
   selectedCountry,
@@ -27,6 +39,9 @@ const CountrySelector: React.FC<CountrySelectorProps> = ({
   const [searchTerm, setSearchTerm] = useState("");
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  /**
+   * Effect to handle closing the dropdown when clicking outside
+   */
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -40,14 +55,37 @@ const CountrySelector: React.FC<CountrySelectorProps> = ({
     };
   }, []);
 
-  const countriesArray: CountryWithISO[] = Object.entries(countries).map(([iso, country]) => ({
-    ...country,
-    iso,
-  }));
-
-  const filteredCountries = countriesArray.filter((country) =>
-    country.name.toLowerCase().includes(searchTerm.toLowerCase())
+  /**
+   * Memoized array of countries with ISO codes
+   * @type {CountryWithISO[]}
+   */
+  const countriesArray = useMemo(() => 
+    Object.entries(countries).map(([iso, country]) => ({
+      ...country,
+      iso,
+    })),
+    [countries]
   );
+
+  /**
+   * Memoized array of filtered countries based on search term
+   * @type {CountryWithISO[]}
+   */
+  const filteredCountries = useMemo(() => 
+    countriesArray.filter((country) =>
+      country.name.toLowerCase().includes(searchTerm.toLowerCase())
+    ),
+    [countriesArray, searchTerm]
+  );
+
+  /**
+   * Handles the selection of a country
+   * @param {CountryWithISO} country - The selected country
+   */
+  const handleCountrySelect = (country: CountryWithISO) => {
+    onSelectCountry(country);
+    setIsOpen(false);
+  };
 
   return (
     <div className="country-selector" ref={dropdownRef}>
@@ -58,6 +96,7 @@ const CountrySelector: React.FC<CountrySelectorProps> = ({
               src={`https://flagcdn.com/${selectedCountry.iso.toLowerCase()}.svg`}
               alt={`${selectedCountry.name} flag`}
               className="country-flag"
+              loading="lazy"
             />
             <span>{selectedCountry.calling_code}</span>
           </>
@@ -73,18 +112,13 @@ const CountrySelector: React.FC<CountrySelectorProps> = ({
           />
           <ul>
             {filteredCountries.map((country) => (
-              <li
-                key={country.id}
-                onClick={() => {
-                  onSelectCountry(country);
-                  setIsOpen(false);
-                }}
-              >
+              <li key={country.id} onClick={() => handleCountrySelect(country)}>
                 <div className="country-option">
                   <img
                     src={`https://flagcdn.com/${country.iso.toLowerCase()}.svg`}
                     alt={`${country.name} flag`}
                     className="country-flag"
+                    loading="lazy"
                   />
                   <span>{country.name}</span>
                 </div>

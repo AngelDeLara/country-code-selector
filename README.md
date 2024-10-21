@@ -18,7 +18,7 @@ This project is a mobile-first React application that implements an efficient co
 To run this project locally, follow these steps:
 
 1. Clone the repository:
-   git clone https://github.com/yourusername/country-code-selector-challenge.git
+   git clone https://github.com/AngelDeLara/country-code-selector.git
    cd country-code-selector-challenge
 
 2. Install dependencies:
@@ -31,7 +31,7 @@ To run this project locally, follow these steps:
 4. Start the development server:
    npm start
 
-5. Open ************ to view the app in your browser.
+5. Open [this link](https://country-code-selector.vercel.app/) to view the app in your browser.
 
 ## Available Scripts
 
