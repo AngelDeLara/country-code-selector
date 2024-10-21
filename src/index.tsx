@@ -1,13 +1,23 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import './index.css';
 import App from './App';
+import './index.css';
 
-const root = ReactDOM.createRoot(
-  document.getElementById('root') as HTMLElement
-);
+// Check if required environment variables are defined
+if (!process.env.REACT_APP_API_KEY || !process.env.REACT_APP_API_BASE_URL) {
+  throw new Error('Required environment variables are not defined. Please check your .env file');
+}
+
+const rootElement = document.getElementById('root');
+if (!rootElement) throw new Error('Failed to find the root element');
+
+const root: ReactDOM.Root = ReactDOM.createRoot(rootElement);
+
+// Render the application
 root.render(
   <React.StrictMode>
-    <App />
+    <React.Suspense fallback={<div>Loading...</div>}>
+      <App />
+    </React.Suspense>
   </React.StrictMode>
 );
